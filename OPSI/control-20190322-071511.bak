@@ -1,0 +1,208 @@
+[Package]
+version: 2
+depends: 
+
+[Product]
+type: localboot
+id: config-win-base
+name: Windows Customizing
+description: Anpassung von Windows XP / Vista / Win7 Einstellungen
+advice: 
+version: 4.0.1
+priority: 0
+licenseRequired: False
+productClasses: 
+setupScript: setup.ins
+uninstallScript: 
+updateScript: 
+alwaysScript: 
+onceScript: 
+customScript: 
+userLoginScript: setup.ins
+
+[ProductProperty]
+type: bool
+name: reboot
+description: Reboot after applying the registry changes
+default: True
+
+[ProductProperty]
+type: unicode
+name: flag_allowremoterpc
+multivalue: False
+editable: True
+description: Allow remote procedures to run on this computer (note: posssible security risk)
+values: ["0", "1"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: flag_screensaveactive
+multivalue: False
+editable: False
+description: Activate screen saver
+values: ["off", "on"]
+default: ["off"]
+
+[ProductProperty]
+type: unicode
+name: flag_xp_firewall
+multivalue: False
+editable: False
+description: Enable xp firewall
+values: ["off", "on"]
+default: ["on"]
+
+[ProductProperty]
+type: unicode
+name: flag_usb
+multivalue: False
+editable: False
+description: Enable use of USB Storage Devices
+values: ["off", "on"]
+default: ["on"]
+
+[ProductProperty]
+type: unicode
+name: flag_nowindowstour
+multivalue: False
+editable: False
+description: No Windows Tour
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: flag_noerrorreport
+multivalue: False
+editable: False
+description: No error report to Microsoft
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: flag_noautoruncd
+multivalue: False
+editable: False
+description: No CD Autorun
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: flag_noballoons
+multivalue: False
+editable: False
+description: No Hints
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: flag_classicstartmenu
+multivalue: False
+editable: False
+description: Classic Start Menu
+values: ["0", "1"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: flag_classiccontrol
+multivalue: False
+editable: False
+description: Classic system control
+values: ["0", "1"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: flag_numlockon
+multivalue: False
+editable: False
+description: Numlock On
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: flag_explorer
+multivalue: False
+editable: False
+description: Masterflag: Do Explorer Settings
+values: ["0", "1"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: flag_explorer_showsystemfiles
+multivalue: False
+editable: False
+description: 1=Show protected system files and directories
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: val_explorer_classicviewstate
+multivalue: False
+editable: False
+description: Do not save the view individually for each folder
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: val_explorer_hidefileext
+multivalue: False
+editable: False
+description: hide known file extensions
+values: ["0", "1"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: val_explorer_hidden
+multivalue: False
+editable: False
+description: 1 = show all files; 2 = hide hidden
+values: ["1", "2"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: val_explorer_webview
+multivalue: False
+editable: False
+description: use web view
+values: ["0", "1"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: flag_waitfornetwork
+multivalue: False
+editable: False
+description: Wait for network at startup
+values: ["0", "1"]
+default: ["1"]
+
+[ProductProperty]
+type: unicode
+name: flag_i386pathc
+multivalue: False
+editable: True
+description: Change search path for i386 0 = will not be changed
+values: ["0", "c:\\", "d:\\"]
+default: ["0"]
+
+[ProductProperty]
+type: unicode
+name: force_login_script
+multivalue: False
+editable: False
+description: Run user login script
+values: ["off", "on"]
+default: ["off"]
+

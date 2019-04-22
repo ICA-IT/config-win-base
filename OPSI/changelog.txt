@@ -1,0 +1,49 @@
+config-win-base (4.0.1-1) stable; urgency=low
+
+  * deleted: ProductProperties for flag_networkpostscriptprinter, networkpostscriptprintername, networkpostscriptprinterurl
+  * consolidation: one Property to show all systemfiles
+  * flag_i386Path changed for more facilities, default no change
+
+ -- karsten koepke <k.koepke@uib.de>  Wed,  12.Dez 2011 8:44:00 +0200
+
+config-win-base (4.0.1-1) stable; urgency=low
+
+  * renamed from xpconfig
+  * required winst >= 4.11.2
+  * use of [profile actions] and user profile management support
+  * flag_numlockon: default switched to 0
+  * new property: force_login_script
+  * removed: noStandardShares (moved to config-secure)
+
+ -- detlef oertel <d.oertel@uib.de>  Wed,  29 Nov 2011 15:35:00 +0200
+
+xpconfig (4.0.1-1) unstable; urgency=low
+
+  * added: support for win7-x64
+
+ -- detlef oertel <d.oertel@uib.de>  Wed,  20 Apr 2011 15:35:00 +0200
+
+
+xpconfig 2.6-1 30.10.2009 detlef oertel
+	* sub-section getparams removed
+	* IniVar replaced by GetProductProperty
+	* property descriptions also in script
+	* prepared for runing also stand alone (outside opsi)
+	* added winconfig image
+
+xpconfig 2.5-1 11.9.2009 detlef oertel 
+	* added ScreenSaveActive (default off)
+	* fix: xp_firewall, usb
+	* redesign
+
+xpconfig 2.4-1 17.3.2009 detlef oertel 
+	* changed condition for installation:
+		set $INST_NTVersion$ = GetMsVersionInfo
+		;if not($INST_MinorOS$ = "Windows Vista") or ($INST_MinorOS$ = "WinXP") or ($INST_MinorOS$ = "Win2k"))
+		if ($INST_NTVersion$ INT< "5")
+
+
+xpconfig 2.3-1 3.2.2009 bardo wolf 
+	* new flag xp-firewall
+
+

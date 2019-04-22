@@ -1,0 +1,432 @@
+[Actions]
+requiredWinstVersion >= "4.11.2.1"
+comment "define variables"
+sub_define_vars
+
+Message=Windows config ......
+ShowBitMap "%ScriptPath%\winconfig.png" "Win Config"
+
+set $INST_NTVersion$ = GetMsVersionInfo
+
+comment "Set Values"
+sub_get_properties
+
+comment "do patches"
+
+;http://support.microsoft.com/?scid=kb%3Ben-us%3B947709&x=11&y=14
+if $Flag_xp_firewall$ = "on"
+	if ($INST_NTVersion$ >= "6")
+		DosInAnIcon_nt6_firewall_on winst /sysnative
+	else
+		DosInAnIcon_nt5_firewall_on
+	endif
+else
+	if ($INST_NTVersion$ >= "6")
+		DosInAnIcon_nt6_firewall_off winst /sysnative
+	else
+		DosInAnIcon_nt5_firewall_off
+	endif
+endif
+
+
+; http://support.microsoft.com/default.aspx?scid=kb;en-us;823732
+if $Flag_usb$ = "on"
+	Registry_usb_on /sysnative
+else
+	Registry_usb_off /sysnative
+endif
+
+
+if ($Flag_NoWindowsTour$ = "1")
+	Registry_NoWindowsTour /sysnative
+endif
+ 
+if ($Flag_NoErrorReport$ = "1")
+	Registry_NoErrorReport /sysnative
+endif
+
+if ($Flag_NoAutorunCD$ = "1")
+	Registry_NoAutorunCD /sysnative
+endif
+
+if ($Flag_NoBalloons$ = "1")
+	Registry_NoBalloons /sysnative
+endif
+
+if ($Flag_NoStandardShares$ = "1")
+	Registry_NoStandardShares /sysnative
+else
+	Registry_StandardShares /sysnative
+endif
+
+if ($Flag_NetworkPostscriptPrinter$ = "1")
+	Dosinanicon_NetworkPostscriptPrinter
+endif   
+
+if ($Flag_WaitForNetwork$ = "1")
+	Registry_WaitForNetwork /sysnative
+endif
+
+if ($Flag_i386PathC$ = "1")
+	Registry_set_i386_source /sysnative
+endif
+ 
+comment "Patch the local Profiles ..."
+ProfileActions
+
+ExitWindows /Reboot
+
+[ProfileActions]
+DefVar $doprofile$
+DefVar $force_login_script$
+
+comment "The profile part ..."
+set $doprofile$ = "true"
+
+if GetScriptMode = "Login"
+	comment "we are at login ..."
+	if getValue("installationstate", getProductMap) = "installed"
+		comment "Product is installed"
+		comment "should loginscript run on every login"
+		Set $force_login_script$ = GetProductProperty("force_login_script", "off")
+		comment "Did we run this script before ? - and set version stamp in profile"
+		if scriptWasExecutedBefore and ($force_login_script$ = "off")
+			comment "loginscript did run before - nothing to do"
+			set $doprofile$ = "false"
+		endif
+	else
+		comment "Product is not installed - so we do not patch the profile"
+		set $doprofile$ = "false"
+	endif
+	if $doprofile$ = "true"
+		Message=Windows config ......
+		ShowBitMap "%ScriptPath%\winconfig.png" "Win Config"
+		sub_define_vars
+		sub_get_properties
+	endif
+endif
+
+if $doprofile$ = "true"
+	comment "do patches"
+	
+	if $Flag_ScreenSaveActive$ = "on"
+		Registry_on_ScreenSaveActive /sysnative
+	else
+		Registry_off_ScreenSaveActive /sysnative
+	endif
+	
+	if ($Flag_NoWindowsTour$ = "1")
+		Registry_HKCU_NoWindowsTour /sysnative
+	endif
+	
+	if ($Flag_NoBalloons$ = "1")
+		Registry_HKCU_NoBalloons /sysnative
+	endif
+	
+	if ($Flag_ClassicStartMenu$ = "1")
+		Registry_HKCU_ClassicStartMenu /sysnative
+	endif
+	
+	if ($Flag_ClassicControl$ = "1")
+		Registry_HKCU_Flag_ClassicControl /sysnative
+	endif
+	
+	if ($Flag_NumlockOn$ = "1")
+		Registry_HKCU_NumlockOn /sysnative
+	endif
+	
+	if ($Flag_Explorer$ = "1")
+		Registry_HKCU_ExplorerConfig /sysnative
+	endif
+endif ; $doprofile$ = "true"
+
+[sub_define_vars]
+DefVar $ParmName$
+DefVar $ParmValue$
+DefVar $DefaultValue$
+DefVar $INST_NTVersion$
+
+
+;*** Flag if patch shall be executed
+;*** 0 = do not execute patch
+;*** 1 = execute patch
+
+DefVar $Flag_NoWindowsTour$
+DefVar $Flag_NoErrorReport$
+DefVar $Flag_NoAutorunCD$
+DefVar $Flag_NoBalloons$
+DefVar $Flag_NoStandardShares$
+DefVar $Flag_ClassicStartMenu$
+DefVar $Flag_ClassicControl$
+DefVar $Flag_NumlockOn$
+DefVar $Flag_Explorer$
+DefVar $Flag_NetworkPostscriptPrinter$
+DefVar $NetworkPostscriptPrinterName$
+DefVar $NetworkPostscriptPrinterURL$
+DefVar $Flag_WaitForNetwork$
+DefVar $Flag_i386PathC$
+DefVar $Flag_ScreenSaveActive$
+DefVar $Flag_xp_firewall$
+DefVar $Flag_usb$
+
+
+;*** Values for Explorer Settings
+;*** Achtung, Settings gelten nur für bereits vorhandene Benutzer!
+
+DefVar $Val_Explorer_ClassicViewState$
+DefVar $Val_Explorer_HideFileExt$
+DefVar $Val_Explorer_SuperHidden$
+DefVar $Val_Explorer_ShowSuperHidden$
+DefVar $Val_Explorer_WebViewBarricade$
+DefVar $Val_Explorer_Hidden$
+DefVar $Val_Explorer_WebView$
+
+[sub_get_properties]
+comment "Flag_ScreenSaveActive"
+comment "description: Activate screen saver"
+Set $Flag_ScreenSaveActive$ = GetProductProperty("Flag_ScreenSaveActive", "off")
+
+comment "Flag_xp_firewall"
+comment "description: Enable xp firewall"
+Set $Flag_xp_firewall$ = GetProductProperty("Flag_xp_firewall", "on")
+
+comment "Flag_usb"
+comment "description: Enable use of USB Storage Devices"
+Set $Flag_usb$ = GetProductProperty("Flag_usb", "on")
+
+comment "Flag_NoWindowsTour"
+comment "description: No Windows Tour"
+Set $Flag_NoWindowsTour$ = GetProductProperty("Flag_NoWindowsTour", "1")
+
+comment "Flag_NoErrorReport"
+comment "description: No error report to Microsoft"
+Set $Flag_NoErrorReport$ = GetProductProperty("Flag_NoErrorReport", "1")
+
+comment "Flag_NoAutorunCD"
+comment "description: No CD Autorun"
+Set $Flag_NoAutorunCD$ = GetProductProperty("Flag_NoAutorunCD", "1")
+
+comment "Flag_NoBalloons"
+comment "description: No Hints (Sprechblasen)"
+Set $Flag_NoBalloons$ = GetProductProperty("Flag_NoBalloons", "1")
+
+comment "Flag_xp_firewall"
+comment "description: Enable xp firewall"
+Set $Flag_xp_firewall$ = GetProductProperty("Flag_xp_firewall", "on")
+
+comment "Flag_NoStandardShares"
+comment "description: No C$-Shares"
+Set $Flag_NoStandardShares$ = GetProductProperty("Flag_NoStandardShares", "0")
+
+comment "Flag_ClassicStartMenu"
+comment "description: Classic Start Menu"
+Set $Flag_ClassicStartMenu$ = GetProductProperty("Flag_ClassicStartMenu", "1")
+
+comment "Flag_ClassicControl"
+comment "description: Klassische Systemsteuerung"
+Set $Flag_ClassicControl$ = GetProductProperty("Flag_ClassicControl", "1")
+
+comment "Flag_NumlockOn"
+comment "description: Numlock On"
+Set $Flag_NumlockOn$ = GetProductProperty("Flag_NumlockOn", "1")
+
+comment "Flag_Explorer"
+comment "description: Masterflag: Do Explorer Settings"
+Set $Flag_Explorer$ = GetProductProperty("Flag_Explorer", "1")
+
+comment "Flag_i386PathC"
+comment "description: Suchpfad fuer I386 auf C: setzen"
+Set $Flag_i386PathC$ = GetProductProperty("Flag_i386PathC", "on")
+
+comment "Val_Explorer_ClassicViewState"
+comment "description: Ansicht nicht fuer jeden Ordner einzeln speichern"
+Set $Val_Explorer_ClassicViewState$ = GetProductProperty("Val_Explorer_ClassicViewState", "1")
+
+comment "Val_Explorer_HideFileExt"
+comment "description: hide known file extensions"
+Set $Val_Explorer_HideFileExt$ = GetProductProperty("Val_Explorer_HideFileExt", "0")
+
+comment "Val_Explorer_Hidden"
+comment "description: 1=alle Dateien anzeigen  2=versteckte ausblenden"
+Set $Val_Explorer_Hidden$ = GetProductProperty("Val_Explorer_Hidden", "1")
+
+comment "Val_Explorer_WebView"
+comment "description: use web view"
+Set $Val_Explorer_WebView$ = GetProductProperty("Val_Explorer_WebView", "0")
+
+comment "Val_Explorer_SuperHidden"
+comment "description:  1=geschuetzte Systemdateien und Systemordner anzeigen (I)"
+Set $Val_Explorer_SuperHidden$ = GetProductProperty("Val_Explorer_SuperHidden", "0")
+
+comment "Val_Explorer_ShowSuperHidden"
+comment "description:  1=geschuetzte Systemdateien und Systemordner anzeigen (II)"
+Set $Val_Explorer_ShowSuperHidden$ = GetProductProperty("Val_Explorer_ShowSuperHidden", "0")
+
+comment "Val_Explorer_WebViewBarricade"
+comment "description:  1=geschuetzte Systemdateien und Systemordner anzeigen (III)"
+Set $Val_Explorer_WebViewBarricade$ = GetProductProperty("Val_Explorer_WebViewBarricade", "0")
+
+comment "Flag_NetworkPostscriptPrinter"
+comment "description: Install Network Postscript Printer"
+Set $Flag_NetworkPostscriptPrinter$ = GetProductProperty("Flag_NetworkPostscriptPrinter", "0")
+
+comment "NetworkPostscriptPrinterName"
+comment "description: Network Postscript Printer Name"
+Set $NetworkPostscriptPrinterName$ = GetProductProperty("NetworkPostscriptPrinterName", "")
+
+comment "NetworkPostscriptPrinterUrl"
+comment "description: Network Postscript Printer URL: \\server\queue"
+Set $NetworkPostscriptPrinterUrl$ = GetProductProperty("NetworkPostscriptPrinterUrl", "")
+
+comment "Flag_WaitForNetwork"
+comment "description: Beim Start auf Netzwerk warten"
+Set $Flag_WaitForNetwork$ = GetProductProperty("Flag_WaitForNetwork", "1")
+
+comment "Flag_i386PathC"
+comment "description: Suchpfad fuer I386 auf C: setzen"
+Set $Flag_i386PathC$ = GetProductProperty("Flag_i386PathC", "1")
+
+
+
+;***********************
+;**    misc	   ***
+;***********************
+
+[DosInAnIcon_nt5_firewall_on]
+netsh firewall set opmode enable
+
+[DosInAnIcon_nt5_firewall_off]
+netsh firewall set opmode disable
+
+[DosInAnIcon_nt6_firewall_on]
+netsh advfirewall set currentprofile state on
+
+[DosInAnIcon_nt6_firewall_off]
+netsh advfirewall set currentprofile state off
+
+;***********************
+;**    SUB-Sektion   ***
+;***********************
+
+
+;***********************
+;**    HKLM-Einträge ***
+;***********************
+
+;** Windows-Tour abschalten
+[Registry_NoWindowsTour]
+openKey [HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Applets\Tour]
+set "RunCount" = REG_DWORD:00000000
+
+;** keine Fehlerberichte an Microsoft
+[Registry_NoErrorReport]
+openKey [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PCHealth\ErrorReporting]
+set "DoReport" = REG_DWORD:00000000
+set "ShowUI"   = REG_DWORD:00000001
+
+;** Microsoft-Online-Überprüfung bei Neustart mit Internet verhindern
+[Registry_RegDone]
+openkey [HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion]
+set "RegDone" = "1"
+
+;** CD Autorun abschalten
+[Registry_NoAutorunCD]
+openkey [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CDRom]
+set "AutoRun" = REG_DWORD:00000000
+
+;** keine Tooltipp-Animation (Sprechblasen)
+[Registry_NoBalloons]
+openkey [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\TooltipAnimation]
+set "CheckedValue" = REG_DWORD:0000
+openkey [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+set "EnableBalloonTips" = REG_DWORD:00000000
+
+;** keine Standardfreigaben (C$-Share)
+[Registry_NoStandardShares]
+openkey [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanmanServer\Parameters]
+set "AutoShareWks" = REG_DWORD:00000000
+
+;** keine Standardfreigaben (C$-Share)
+[Registry_StandardShares]
+openkey [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanmanServer\Parameters]
+set "AutoShareWks" = REG_DWORD:00000001
+
+[Registry_set_i386_source]
+openkey [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Setup]
+set "SourcePath" = "C:"
+set "ServicePackSourcePath" = "C:"
+set "CDInstall" = reg_dword:0
+
+[Registry_WaitForNetwork]
+openkey [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\WindowsNT\CurrentVersion\Winlogon]
+set "SyncForegroundPolicy" = reg_dword:1
+
+
+;***********************
+;**    HKCU-Einträge ***
+;***********************
+
+[Registry_on_ScreenSaveActive]
+openKey [HKCU\Control Panel\Desktop]
+set "ScreenSaveActive"=REG_DWORD:00000001
+
+[Registry_off_ScreenSaveActive]
+openKey [HKCU\Control Panel\Desktop]
+set "ScreenSaveActive"=REG_DWORD:00000000
+
+
+;** keine Windows Tour
+[Registry_HKCU_NoWindowsTour]
+openKey [HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\Tour]
+set "RunCount"=REG_DWORD:00000000
+
+;** Klassisches Startmenü
+[Registry_HKCU_ClassicStartMenu]
+openKey [HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+set "NoSimpleStartMenu" = REG_DWORD:00000001
+
+;** Klassische Systemsteuerung
+[Registry_HKCU_Flag_ClassicControl]
+openKey [HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+set "ForceClassicControlPanel" = REG_DWORD:00000001
+
+;** Numlock aktivieren
+[Registry_HKCU_NumlockOn]
+openKey [HKCU\Control Panel\Keyboard]
+set "InitialKeyboardIndicators"="2"
+
+;** Explorer Konfiguration
+[Registry_HKCU_ExplorerConfig]
+openKey [HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+Set "ClassicViewState" = REG_DWORD:$Val_Explorer_ClassicViewState$
+Set "HideFileExt"      = REG_DWORD:$Val_Explorer_HideFileExt$
+Set "SuperHidden"      = REG_DWORD:$Val_Explorer_SuperHidden$
+Set "ShowSuperHidden"  = REG_DWORD:$Val_Explorer_ShowSuperHidden$
+Set "WebViewBarricade" = REG_DWORD:$Val_Explorer_WebViewBarricade$
+Set "Hidden"           = REG_DWORD:$Val_Explorer_Hidden$
+Set "WebView"          = REG_DWORD:$Val_Explorer_WebView$
+
+;** No Balloons
+[Registry_HKCU_NoBalloons]
+openKey [HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+set "EnableBalloonTips"=REG_DWORD:00000000
+set "FolderContentsInfoTip"=REG_DWORD:00000000
+set "StartButtonBalloonTip"=REG_DWORD:00000000
+set "ShowInfoTip"=REG_DWORD:00000000
+openkey [HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\tips]
+set "Show"=REG_DWORD:00000000
+openkey [HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+set "NoSMBalloonTip"=REG_DWORD:00000000
+
+[Registry_usb_off]
+openkey [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\usbstor]
+set "start"= REG_DWORD:4
+
+[Registry_usb_on]
+openkey [HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\usbstor]
+set "start"= REG_DWORD:3
+
+;**  Network Postscript Printer einrichten
+[Dosinanicon_NetworkPostscriptPrinter]
+rundll32 printui.dll,PrintUIEntry /b "$NetworkPostscriptPrinterName$" /if /f c:\windows\inf\ntprint.inf /r "$NetworkPostscriptPrinterUrl$" /m "Apple Color LW 12/660 PS"
+
